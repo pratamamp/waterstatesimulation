@@ -18,4 +18,8 @@ test('auto fill dan sensor contract', () => {
   assert.equal(s.state.workflow, 'FILL'); assert.equal(s.state.fillPump, true);
   s.state.level = 0.99; s.tick(); assert.equal(s.state.workflow, 'IDLE'); assert.equal(s.state.fillPump, false);
   const records = sensorRecords(s); assert.equal(records.length, 10); assert.equal(records[9].id, 9); assert.ok('lng' in records[0]);
+  assert.equal(records[0].value, 500); assert.equal(records[0].unit, 'L'); assert.equal(records[0].status, 0);
+  s.state.level = 0.5; assert.equal(sensorRecords(s)[0].value, 250); assert.equal(sensorRecords(s)[0].status, 1);
+  s.state.level = 0; assert.equal(sensorRecords(s)[0].value, 0); assert.equal(sensorRecords(s)[0].status, 0);
+  s.state.level = 1; assert.equal(sensorRecords(s)[0].value, 500); assert.equal(sensorRecords(s)[0].status, 0);
 });

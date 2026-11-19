@@ -77,5 +77,16 @@ export class Simulation {
 const positions = [[32.4041753,-117.0779670],[32.4050562,-117.0790661],[32.4043391,-117.0786295],[32.4038756,-117.0784616],[32.4052254,-117.0799734],[32.4044668,-117.0796803],[32.4036501,-117.0791684],[32.4051008,-117.0806950],[32.4039885,-117.0800285],[32.4034342,-117.0798029]];
 export function sensorRecords(sim: Simulation) {
   const timestamp = new Date().toISOString().replace(/\.\d{3}Z$/, 'Z');
-  return positions.map(([lat, lng], id) => ({ device_id: 'WU-RES-001', id, name: id ? `Flow Sensor ${id}` : 'Water Level Sensor', type: 'sensor', status: 1, value: Number((id ? sim.state.flows[id - 1] : sim.state.level).toFixed(3)), unit: id ? 'L/s' : 'm', lat, lng, timestamp }));
+  return positions.map(([lat, lng], id) => {
+    const isWaterLevel = id === 0;
+    const value = isWaterLevel ? sim.state.level * 500 : sim.state.flows[id - 1];
+    return {
+      device_id: 'WU-RES-001', id,
+      name: isWaterLevel ? 'Water Level Sensor' : `Flow Sensor ${id}`,
+      type: 'sensor',
+      status: isWaterLevel && (sim.state.level <= 0 || sim.state.level >= 1) ? 0 : 1,
+      value: Number(value.toFixed(3)), unit: isWaterLevel ? 'L' : 'L/s',
+      lat, lng, timestamp,
+    };
+  });
 }

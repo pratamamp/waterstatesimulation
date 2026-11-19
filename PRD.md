@@ -442,9 +442,9 @@ Koordinat memakai WGS84/EPSG:4326. Longitude selalu memakai field `lng`, bukan `
 | `id` | integer | Ya | Stabil `0..9` |
 | `name` | string | Ya | Sesuai registry |
 | `type` | string | Ya | Selalu `sensor` |
-| `status` | integer | Ya | `1`; nilai flow `0` tetap valid |
-| `value` | number | Ya | Quantized maksimal tiga desimal |
-| `unit` | string | Ya | `m` atau `L/s` |
+| `status` | integer | Ya | Water level `0` pada kapasitas `0%` atau `100%`, selainnya `1`; flow selalu `1` |
+| `value` | number | Ya | Water level berisi kapasitas tanki `0..500` (L); flow berisi nilai L/s. Quantized maksimal tiga desimal |
+| `unit` | string | Ya | `L` untuk Water Level Sensor atau `L/s` untuk flow sensor |
 | `lat` | number | Ya | WGS84 |
 | `lng` | number | Ya | WGS84 |
 | `timestamp` | string | Ya | ISO 8601 UTC |

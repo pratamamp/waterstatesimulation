@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { Simulation } from './engine';
 import { MqttTransport } from './mqtt';
 
-test('sensor dikirim ke satu topic firmware tanpa retain, hanya saat berubah', () => {
+test('sensor dikirim ke satu topic tanpa retain, hanya saat berubah', () => {
   const previousEnabled = process.env.MQTT_ENABLED;
   const previousTopic = process.env.MQTT_TOPIC_ROOT;
   process.env.MQTT_ENABLED = 'false';
