@@ -28,6 +28,7 @@ Buka `http://localhost:3001`. Jalankan pengujian dengan `npm test`.
 - Dashboard real-time melalui SSE, API command, dan riwayat sesi dasar di SQLite.
 - Endpoint `/api/v1/sensors` menyediakan 10 canonical sensor records.
 - MQTT menggunakan TLS, publish sensor saat nilai berubah, dan mengirim ulang seluruh sensor saat reconnect.
+- Distribusi dapat dimulai dan dihentikan melalui kontrol workflow. Toggle workflow otomatis mengisi reservoir bila belum penuh, memulai distribusi saat penuh, dan mengisi ulang pada level 15% sebelum mengulang siklus. Tombol hentikan menonaktifkan siklus. Pompa otomatis dan manual tetap tersedia secara terpisah; pompa manual tidak tersedia saat workflow otomatis aktif.
 
 ## Konfigurasi MQTT
 

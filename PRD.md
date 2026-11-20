@@ -419,9 +419,11 @@ Satu nilai random flow dihitung per branch per tick lalu dipakai konsisten. Pema
 
 ## 15. Sensor registry
 
+Simulator memiliki 10 aset sensor: satu sensor kapasitas reservoir dan sembilan sensor debit pada tiga branch distribusi. Daftar dan koordinat berikut mengikuti `server/engine.ts`.
+
 | ID | Nama | Posisi | Unit | Latitude | Longitude |
 |---:|---|---|---|---:|---:|
-| 0 | Water Level Sensor | Tower `Strg-1` | `m` | 32.4041753 | -117.0779670 |
+| 0 | Water Level Sensor | Reservoir `Strg-1` | `L` | 32.4041753 | -117.0779670 |
 | 1 | Flow Sensor 1 | Branch A inlet | `L/s` | 32.4050562 | -117.0790661 |
 | 2 | Flow Sensor 2 | Branch A house | `L/s` | 32.4043391 | -117.0786295 |
 | 3 | Flow Sensor 3 | Branch A outlet | `L/s` | 32.4038756 | -117.0784616 |
@@ -432,7 +434,7 @@ Satu nilai random flow dihitung per branch per tick lalu dipakai konsisten. Pema
 | 8 | Flow Sensor 8 | Branch C house | `L/s` | 32.4039885 | -117.0800285 |
 | 9 | Flow Sensor 9 | Branch C outlet | `L/s` | 32.4034342 | -117.0798029 |
 
-Koordinat memakai WGS84/EPSG:4326. Longitude selalu memakai field `lng`, bukan `lon`.
+Koordinat memakai WGS84/EPSG:4326. Latitude menggunakan field `lat`; longitude menggunakan field `lng`, bukan `lon`. Titik simulasi kebocoran Branch B berada antara sensor 4 dan sensor 5.
 
 ## 16. Canonical sensor record
 

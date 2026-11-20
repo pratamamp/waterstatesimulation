@@ -27,6 +27,7 @@ type Snapshot = {
   volume: number;
   levelCm: number;
   distanceCm: number;
+  autoWorkflow: boolean;
   autoPump: boolean;
   manualFill: boolean;
   fillPump: boolean;
@@ -251,7 +252,9 @@ function App() {
           ) : (
             <>
               <div className="page-heading">
-                <div></div>
+                <div>
+                  <h1>SIMULATOR</h1>
+                </div>
                 <button
                   className="reset-button"
                   disabled={pending}
@@ -284,16 +287,18 @@ function App() {
               <div className="dashboard-layout">
                 <div className="insight-layout">
                   <div className="network-insight">
-                    <div className="section-heading">
+                    <div className="section-heading network-heading">
                       <div className="network-heading-copy">
                         <div className="section-kicker">
                           DISTRIBUTION NETWORK
                         </div>
+                        <h2>Jalur distribusi</h2>
+                        <p>Pantau aliran air dan kondisi setiap jalur.</p>
+                      </div>
+                      <div className="legend">
                         <span className="valve-count">
                           {s.valves.filter(Boolean).length} VALVE TERBUKA
                         </span>
-                      </div>
-                      <div className="legend">
                         <span>
                           <i className="legend-dot flowing" /> Valve terbuka
                         </span>
@@ -421,24 +426,26 @@ function App() {
                       <div className="control-actions">
                         <button
                           className="primary-btn"
-                          disabled={pending || (!isRunning && !s.startEnabled)}
+                          disabled={pending || (!s.autoWorkflow && !isRunning && !s.startEnabled)}
                           onClick={() =>
                             command("workflow", {
-                              state: isRunning ? "IDLE" : "RUN",
+                              state: isRunning || s.autoWorkflow ? "IDLE" : "RUN",
                             })
                           }
                         >
-                          {isRunning ? (
+                          {isRunning || s.autoWorkflow ? (
                             <Pause size={16} />
                           ) : (
                             <Play size={16} fill="currentColor" />
                           )}
-                          {isRunning
+                          {isRunning || s.autoWorkflow
                             ? "Hentikan distribusi"
                             : "Mulai distribusi"}
                         </button>
                         <p>
-                          {s.startEnabled
+                          {s.autoWorkflow
+                            ? "Siklus otomatis aktif. Hentikan untuk mengakhiri."
+                            : s.startEnabled
                             ? "Reservoir penuh dan siap untuk distribusi."
                             : isRunning
                               ? "Distribusi sedang berjalan."
@@ -446,6 +453,11 @@ function App() {
                         </p>
                       </div>
                       <div className="control-list">
+                        <div className="switch-row">
+                          <div className="control-icon"><Activity size={16} /></div>
+                          <div className="switch-copy"><b>Workflow otomatis</b><small>Isi ulang pada 15%, mulai distribusi saat penuh</small></div>
+                          <Switch label="Workflow otomatis" checked={s.autoWorkflow} disabled={pending} onChange={(v) => command("auto-workflow", { enabled: v })} />
+                        </div>
                         <div className="switch-row">
                           <div className="control-icon">
                             <Zap size={16} />
@@ -470,7 +482,7 @@ function App() {
                           <div className="switch-copy">
                             <b>Pompa manual</b>
                             <small>
-                              {s.autoPump
+                              {s.autoPump || s.autoWorkflow
                                 ? "Tidak tersedia saat otomatis aktif"
                                 : "Isi reservoir secara manual"}
                             </small>
@@ -478,7 +490,7 @@ function App() {
                           <Switch
                             label="Pompa manual"
                             checked={s.manualFill}
-                            disabled={pending || s.autoPump}
+                            disabled={pending || s.autoPump || s.autoWorkflow}
                             onChange={(v) =>
                               command("fill-pump", { enabled: v })
                             }

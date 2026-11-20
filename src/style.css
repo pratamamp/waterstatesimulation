@@ -308,7 +308,7 @@ body { background: var(--bg); }
 /* Pipe network and loss sit together as the primary analysis. */
 .insight-layout { display: grid; grid-template-columns: minmax(0, 2fr) minmax(260px, .78fr); align-items: stretch; gap: 18px; }
 .network-insight { min-width: 0; }
-.network-insight .section-heading { align-items: center; margin: 0 0 12px; min-height: 0; }
+.network-insight .section-heading { align-items: center; flex-direction: row; justify-content: flex-start; margin: 0 0 10px; min-height: 0; height: auto; gap: 14px; }
 .network-insight .section-heading h2 { font-size: 21px; letter-spacing: -.6px; }
 .section-heading h2 span { color: #13796f; background: #e6f6f1; border-color: #c1e6dc; }
 .legend { color: #587780; padding-top: 6px; }
@@ -479,8 +479,51 @@ body { line-height: 1.5; }
   .operations-section .overview-grid { grid-template-columns: 1fr; }
 }
 
-.network-heading-copy { display: grid; grid-template-columns: auto auto; align-items: center; gap: 10px; min-width: 0; }
+.network-heading-copy { width: 100%; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 14px; min-width: 0; }
+.network-heading-copy .section-kicker { margin: 0; line-height: 1.2; }
 .valve-count { color: #13796f; background: #e6f6f1; border: 1px solid #c1e6dc; border-radius: 3px; padding: 5px 8px; font-size: 10px; font-weight: 600; letter-spacing: .035em; white-space: nowrap; }
 @media (max-width: 480px) {
   .network-heading-copy { gap: 8px; }
+}
+
+/* Balance the network heading and keep branch details within each card. */
+.network-insight .section-heading { justify-content: space-between; flex-wrap: wrap; row-gap: 10px; }
+.network-heading-copy { width: auto; grid-template-columns: auto auto; gap: 12px; }
+.network-insight .legend { padding: 0; flex-wrap: wrap; gap: 16px; }
+.branch-card { grid-template-columns: minmax(180px, 1fr) minmax(240px, 2fr) minmax(135px, .8fr); }
+.branch-header > div:nth-child(2) { min-width: 0; }
+.branch-header > div:nth-child(2) > span { display: block; line-height: 1.4; }
+.branch-footer { min-width: 0; gap: 8px; }
+.branch-footer > span { min-width: 0; }
+.branch-footer > svg { flex-shrink: 0; }
+.network-heading-copy { display: flex; align-items: center; gap: 14px; }
+.network-heading-copy .section-kicker { display: flex; align-items: center; font-size: 11px; font-weight: 600; letter-spacing: .06em; line-height: 1; white-space: nowrap; }
+.network-heading-copy .valve-count { display: inline-flex; align-items: center; line-height: 1; padding: 7px 9px; }
+@media (max-width: 1200px) {
+  .branch-card { grid-template-columns: minmax(150px, 1fr) minmax(220px, 1.7fr); }
+}
+@media (max-width: 950px) {
+  .branch-card { grid-template-columns: minmax(160px, 1fr) minmax(220px, 1.7fr); }
+  .branch-footer { grid-column: 1 / -1; border-left: 0; border-top: 1px solid #e4eeee; padding: 10px 0 0; }
+}
+@media (max-width: 680px) {
+  .network-insight .section-heading { align-items: flex-start; }
+  .network-heading-copy { max-width: 100%; }
+}
+@media (max-width: 360px) {
+  .network-heading-copy { flex-wrap: wrap; gap: 6px; }
+  .valve-count { justify-self: start; }
+}
+
+/* Match the network heading to the operations section hierarchy. */
+.network-insight .network-heading { align-items: end; gap: 16px; margin-bottom: 16px; }
+.network-heading-copy { display: block; min-width: 0; }
+.network-heading-copy .section-kicker { display: block; font-size: 10px; font-weight: 500; letter-spacing: .07em; line-height: 1.5; white-space: normal; }
+.network-insight .network-heading h2 { margin-top: 8px; font-size: 21px; letter-spacing: -.6px; color: #173747; }
+.network-heading-copy p { margin-top: 6px; color: #657f88; font-size: 13px; }
+.network-heading .legend { display: flex; align-items: center; justify-content: flex-end; gap: 14px; }
+.network-heading .valve-count { display: inline-flex; align-items: center; line-height: 1; padding: 7px 9px; }
+@media (max-width: 680px) {
+  .network-insight .network-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
+  .network-heading .legend { justify-content: flex-start; }
 }

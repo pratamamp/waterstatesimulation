@@ -23,3 +23,29 @@ test('auto fill dan sensor contract', () => {
   s.state.level = 0; assert.equal(sensorRecords(s)[0].value, 0); assert.equal(sensorRecords(s)[0].status, 0);
   s.state.level = 1; assert.equal(sensorRecords(s)[0].value, 500); assert.equal(sensorRecords(s)[0].status, 0);
 });
+test('kontrol manual workflow dan pompa', () => {
+  const s = new Simulation(() => 0.5);
+  s.tick(); assert.equal(s.state.workflow, 'IDLE');
+  s.command('workflow', 'RUN'); s.tick(); assert.equal(s.state.workflow, 'RUN');
+  s.command('workflow', 'IDLE'); s.tick(); assert.deepEqual(s.state.flows, Array(9).fill(0));
+  s.state.level = 0.5; s.command('fill-pump', true); s.tick(); assert.equal(s.state.fillPump, true);
+  s.command('fill-pump', false); s.tick(); assert.equal(s.state.fillPump, false);
+  s.command('auto-pump', true); assert.throws(() => s.command('fill-pump', true), /AUTO_PUMP_ACTIVE/);
+});
+test('workflow otomatis mengulang pengisian dan distribusi sampai dihentikan', () => {
+  const s = new Simulation(() => 0.5);
+  s.state.level = 0.5; s.command('auto-workflow', true); s.tick();
+  assert.equal(s.state.workflow, 'FILL'); assert.equal(s.state.fillPump, true);
+  s.state.level = 0.994; s.tick(0.001); assert.equal(s.state.workflow, 'FILL');
+  s.tick(1); assert.equal(s.state.workflow, 'IDLE');
+  s.tick(); assert.equal(s.state.workflow, 'RUN');
+  s.state.level = 0.15; s.tick(); assert.equal(s.state.workflow, 'FILL'); assert.equal(s.state.fillPump, true);
+  s.command('workflow', 'IDLE'); assert.equal(s.state.autoWorkflow, false);
+  s.tick(); assert.equal(s.state.workflow, 'IDLE'); assert.equal(s.state.fillPump, false);
+});
+test('workflow otomatis dapat dinonaktifkan tanpa memulai distribusi', () => {
+  const s = new Simulation(() => 0.5); s.state.level = 0.5;
+  s.command('auto-workflow', true); s.tick(); s.command('auto-workflow', false); s.tick();
+  assert.equal(s.state.workflow, 'IDLE'); assert.equal(s.state.fillPump, false);
+  assert.throws(() => s.command('workflow', 'RUN'), /START_GUARD/);
+});

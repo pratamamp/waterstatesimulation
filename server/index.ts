@@ -63,6 +63,10 @@ let last = performance.now();
 const timer = setInterval(() => {
   const now = performance.now(); const dt = (now - last) / 1000; last = now;
   sim.tick(dt);
+  if (sim.state.workflow === 'RUN' && !runId) {
+    runId = randomUUID(); db.prepare('INSERT INTO runs(id,started_at,status,scenario) VALUES(?,?,?,?)').run(runId, new Date().toISOString(), 'active', sim.state.scenario);
+    event('workflow', 'RUN otomatis');
+  }
   mqttTransport.publishChanged();
   if (runId) db.prepare('INSERT INTO snapshots(run_id,captured_at,state_json) VALUES(?,?,?)').run(runId, new Date().toISOString(), JSON.stringify(snapshot()));
   broadcast();

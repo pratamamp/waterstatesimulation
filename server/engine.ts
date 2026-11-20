@@ -2,7 +2,7 @@ export type Workflow = 'IDLE' | 'RUN' | 'FILL';
 export type Scenario = 'normal' | 'leak_b' | 'manual';
 
 export interface State {
-  workflow: Workflow; level: number; autoPump: boolean; manualFill: boolean; fillPump: boolean;
+  workflow: Workflow; level: number; autoWorkflow: boolean; autoPump: boolean; manualFill: boolean; fillPump: boolean;
   valves: boolean[]; leakB: boolean; scenario: Scenario; flows: number[]; sensorTotals: number[];
   leakRate: number; leakTotal: number; tick: number;
 }
@@ -11,7 +11,7 @@ export class Simulation {
   state: State = this.initial();
   constructor(private random: () => number = Math.random) {}
   initial(): State {
-    return { workflow: 'IDLE', level: 1, autoPump: false, manualFill: false, fillPump: false,
+    return { workflow: 'IDLE', level: 1, autoWorkflow: false, autoPump: false, manualFill: false, fillPump: false,
       valves: [true, true, true], leakB: true, scenario: 'leak_b', flows: Array(9).fill(0),
       sensorTotals: Array(9).fill(0), leakRate: 0, leakTotal: 0, tick: 0 };
   }
@@ -22,6 +22,12 @@ export class Simulation {
       if (!['IDLE', 'RUN', 'FILL'].includes(String(value))) throw new Error('INVALID_INPUT');
       if (value === 'RUN' && (s.workflow !== 'IDLE' || s.level < 0.995)) throw new Error('START_GUARD');
       s.workflow = value as Workflow;
+      if (value === 'IDLE' && s.autoWorkflow) { s.autoWorkflow = false; s.fillPump = false; s.flows.fill(0); s.leakRate = 0; }
+    } else if (type === 'auto-workflow') {
+      if (typeof value !== 'boolean') throw new Error('INVALID_INPUT');
+      s.autoWorkflow = value;
+      if (value) { s.manualFill = false; if (s.workflow !== 'RUN') s.workflow = s.level >= 0.995 ? 'IDLE' : 'FILL'; }
+      else if (s.workflow === 'FILL') { s.workflow = 'IDLE'; s.fillPump = false; }
     } else if (type === 'scenario') {
       if (value !== 'normal' && value !== 'leak_b') throw new Error('INVALID_INPUT');
       s.scenario = value; s.leakB = value === 'leak_b';
@@ -30,7 +36,7 @@ export class Simulation {
       s.autoPump = value; s.manualFill = false;
     } else if (type === 'fill-pump') {
       if (typeof value !== 'boolean') throw new Error('INVALID_INPUT');
-      if (s.autoPump) throw new Error('AUTO_PUMP_ACTIVE');
+      if (s.autoPump || s.autoWorkflow) throw new Error('AUTO_PUMP_ACTIVE');
       s.manualFill = value;
     } else if (type === 'leak-b') {
       if (typeof value !== 'boolean') throw new Error('INVALID_INPUT');
@@ -42,10 +48,12 @@ export class Simulation {
   }
   tick(dt = 1) {
     const s = this.state;
-    if (s.workflow === 'RUN' && s.level <= 0) s.workflow = 'IDLE';
-    else if (s.workflow === 'RUN' && s.level < 0.15 && s.autoPump) s.workflow = 'FILL';
+    if (s.workflow === 'RUN' && s.level <= 0) s.workflow = s.autoWorkflow ? 'FILL' : 'IDLE';
+    else if (s.workflow === 'RUN' && s.level <= 0.15 && (s.autoPump || s.autoWorkflow)) s.workflow = 'FILL';
     else if (s.workflow === 'FILL' && s.level >= 0.995) s.workflow = 'IDLE';
-    if (s.autoPump) {
+    if (s.autoWorkflow && s.workflow === 'IDLE' && s.level >= 0.995) s.workflow = 'RUN';
+    if (s.autoWorkflow && s.workflow === 'FILL') s.fillPump = true;
+    else if (s.autoPump) {
       if (s.level <= 0.15) s.fillPump = true;
       if (s.level >= 0.995) s.fillPump = false;
     } else s.fillPump = s.manualFill;
@@ -58,7 +66,7 @@ export class Simulation {
     } else s.leakRate = 0;
     const outflow = branch.reduce((a, b) => a + b, 0) + s.leakRate;
     s.level = Math.max(0, Math.min(1, s.level + (s.fillPump ? 0.03 * dt : running ? -0.012 * outflow / 125 * dt : 0)));
-    if (s.level <= 0) { s.workflow = 'IDLE'; branch.fill(0); s.leakRate = 0; }
+    if (s.level <= 0) { s.workflow = s.autoWorkflow ? 'FILL' : 'IDLE'; branch.fill(0); s.leakRate = 0; }
     if (s.level >= 0.995 && s.fillPump) { s.fillPump = false; s.manualFill = false; if (s.workflow === 'FILL') s.workflow = 'IDLE'; }
     const postLeak = Math.max(0, branch[1] - s.leakRate);
     s.flows = [branch[0], branch[0], branch[0], branch[1], postLeak, postLeak, branch[2], branch[2], branch[2]];
