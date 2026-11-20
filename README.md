@@ -29,6 +29,7 @@ Buka `http://localhost:3001`. Jalankan pengujian dengan `npm test`.
 - Endpoint `/api/v1/sensors` menyediakan 10 canonical sensor records.
 - MQTT menggunakan TLS, publish sensor saat nilai berubah, dan mengirim ulang seluruh sensor saat reconnect.
 - Distribusi dapat dimulai dan dihentikan melalui kontrol workflow. Toggle workflow otomatis mengisi reservoir bila belum penuh, memulai distribusi saat penuh, dan mengisi ulang pada level 15% sebelum mengulang siklus. Tombol hentikan menonaktifkan siklus. Pompa otomatis dan manual tetap tersedia secara terpisah; pompa manual tidak tersedia saat workflow otomatis aktif.
+- Bukaan valve setiap branch dapat diatur 0–100% dengan slider dan diterapkan otomatis setelah pergeseran berhenti. Debit mengikuti bukaan secara linear; kebocoran Branch B dibatasi oleh debit masuk. Toggle menutup valve dan mempertahankan bukaan terakhir untuk dibuka kembali; jika slider disetel 0%, toggle membukanya kembali pada 100%.
 
 ## Konfigurasi MQTT
 

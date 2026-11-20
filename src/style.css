@@ -527,3 +527,11 @@ body { line-height: 1.5; }
   .network-insight .network-heading { align-items: flex-start; flex-direction: column; gap: 12px; }
   .network-heading .legend { justify-content: flex-start; }
 }
+.valve-opening { grid-column: 1 / -1; display: flex; align-items: center; gap: 14px; border-top: 1px solid #e4eeee; padding-top: 12px; }
+.valve-opening label { display: flex; justify-content: space-between; gap: 14px; min-width: 145px; color: #587780; font-size: 11px; }
+.valve-opening label strong { color: #087d88; font-variant-numeric: tabular-nums; }
+.valve-opening input { flex: 1; min-width: 60px; accent-color: #087d88; cursor: pointer; }
+.valve-opening input:focus-visible { outline: 2px solid #087d88; outline-offset: 3px; }
+.valve-opening button { color: #087d88; background: #edf8f7; border: 1px solid #c9e3df; border-radius: 3px; padding: 6px 10px; font-size: 11px; font-weight: 600; }
+.valve-opening small { color: #587780; font-size: 11px; white-space: nowrap; }
+@media (max-width: 680px) { .valve-opening { margin-top: 12px; flex-wrap: wrap; } .valve-opening label { width: 100%; } }

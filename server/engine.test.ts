@@ -49,3 +49,15 @@ test('workflow otomatis dapat dinonaktifkan tanpa memulai distribusi', () => {
   assert.equal(s.state.workflow, 'IDLE'); assert.equal(s.state.fillPump, false);
   assert.throws(() => s.command('workflow', 'RUN'), /START_GUARD/);
 });
+test('bukaan valve mengatur debit linear dan membatasi kebocoran', () => {
+  const s = new Simulation(() => 0.5); s.command('workflow', 'RUN');
+  s.command('valve-a-opening', 50); s.command('valve-b-opening', 10); s.tick();
+  assert.equal(s.state.flows[0], 22.5); assert.equal(s.state.flows[3], 3.8);
+  assert.equal(s.state.leakRate, 3.8); assert.equal(s.state.flows[4], 0);
+  s.command('valve-a', false); s.tick(); assert.equal(s.state.flows[0], 0);
+  s.command('valve-a', true); s.tick(); assert.equal(s.state.flows[0], 22.5);
+  s.command('valve-a-opening', 0); assert.equal(s.state.valves[0], false);
+  s.tick(); assert.equal(s.state.flows[0], 0); assert.equal(s.state.flows[1], 0); assert.equal(s.state.flows[2], 0);
+  s.command('valve-a', true); assert.equal(s.state.valveOpenings[0], 100);
+  for (const value of [-1, 101, 0.5, '50']) assert.throws(() => s.command('valve-a-opening', value), /INVALID_INPUT/);
+});

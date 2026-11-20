@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createRoot } from "react-dom/client";
 import {
   Activity,
@@ -29,6 +29,7 @@ type Snapshot = {
   distanceCm: number;
   autoWorkflow: boolean;
   autoPump: boolean;
+  valveOpenings: number[];
   manualFill: boolean;
   fillPump: boolean;
   returnPump: boolean;
@@ -377,6 +378,7 @@ function App() {
                             </span>
                             <ArrowRight size={15} />
                           </div>
+                          <ValveOpening branch={branch} opening={s.valveOpenings[i]} open={s.valves[i]} disabled={pending} onApply={(opening) => command(`valve-${branch.toLowerCase()}-opening`, { opening })} />
                         </section>
                       ))}
                     </div>
@@ -778,6 +780,22 @@ function App() {
       </main>
     </div>
   );
+}
+function ValveOpening({ branch, opening, open, disabled, onApply }: { branch: string; opening: number; open: boolean; disabled: boolean; onApply: (value: number) => Promise<void> }) {
+  const [draft, setDraft] = useState(open ? opening : 0);
+  const timer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => { setDraft(open ? opening : 0); }, [opening, open]);
+  useEffect(() => () => { if (timer.current) clearTimeout(timer.current); }, []);
+  return <div className="valve-opening">
+    <label htmlFor={`opening-${branch}`}>Bukaan valve <strong>{draft}%</strong></label>
+    <input id={`opening-${branch}`} type="range" min="0" max="100" step="1" value={draft} disabled={disabled} onChange={(event) => {
+      const value = Number(event.target.value);
+      setDraft(value);
+      if (timer.current) clearTimeout(timer.current);
+      timer.current = setTimeout(() => { timer.current = null; void onApply(value); }, 250);
+    }} />
+    <small>Diterapkan otomatis</small>
+  </div>;
 }
 function Switch({
   checked,

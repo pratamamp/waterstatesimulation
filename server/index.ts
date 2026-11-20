@@ -42,7 +42,7 @@ app.post('/api/v1/commands/reset', (req, res) => {
 });
 app.post('/api/v1/commands/:type', (req, res) => {
   const type = req.params.type;
-  const value = type === 'workflow' ? req.body?.state : type === 'scenario' ? req.body?.scenario : req.body?.enabled;
+  const value = type === 'workflow' ? req.body?.state : type === 'scenario' ? req.body?.scenario : /^valve-[abc]-opening$/.test(type) ? req.body?.opening : req.body?.enabled;
   try {
     sim.command(type, value);
     if (type === 'workflow' && value === 'RUN' && !runId) {

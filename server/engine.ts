@@ -3,7 +3,7 @@ export type Scenario = 'normal' | 'leak_b' | 'manual';
 
 export interface State {
   workflow: Workflow; level: number; autoWorkflow: boolean; autoPump: boolean; manualFill: boolean; fillPump: boolean;
-  valves: boolean[]; leakB: boolean; scenario: Scenario; flows: number[]; sensorTotals: number[];
+  valves: boolean[]; valveOpenings: number[]; leakB: boolean; scenario: Scenario; flows: number[]; sensorTotals: number[];
   leakRate: number; leakTotal: number; tick: number;
 }
 
@@ -12,7 +12,7 @@ export class Simulation {
   constructor(private random: () => number = Math.random) {}
   initial(): State {
     return { workflow: 'IDLE', level: 1, autoWorkflow: false, autoPump: false, manualFill: false, fillPump: false,
-      valves: [true, true, true], leakB: true, scenario: 'leak_b', flows: Array(9).fill(0),
+      valves: [true, true, true], valveOpenings: [100, 100, 100], leakB: true, scenario: 'leak_b', flows: Array(9).fill(0),
       sensorTotals: Array(9).fill(0), leakRate: 0, leakTotal: 0, tick: 0 };
   }
   reset() { this.state = this.initial(); }
@@ -41,9 +41,14 @@ export class Simulation {
     } else if (type === 'leak-b') {
       if (typeof value !== 'boolean') throw new Error('INVALID_INPUT');
       s.leakB = value; s.scenario = 'manual';
+    } else if (/^valve-[abc]-opening$/.test(type)) {
+      if (typeof value !== 'number' || !Number.isInteger(value) || value < 0 || value > 100) throw new Error('INVALID_INPUT');
+      const i = 'abc'.indexOf(type[6]);
+      s.valveOpenings[i] = value; s.valves[i] = value > 0;
     } else if (/^valve-[abc]$/.test(type)) {
       if (typeof value !== 'boolean') throw new Error('INVALID_INPUT');
-      s.valves['abc'.indexOf(type.slice(-1))] = value;
+      const i = 'abc'.indexOf(type.slice(-1));
+      s.valves[i] = value; if (value && s.valveOpenings[i] === 0) s.valveOpenings[i] = 100;
     } else throw new Error('INVALID_INPUT');
   }
   tick(dt = 1) {
@@ -59,12 +64,13 @@ export class Simulation {
     } else s.fillPump = s.manualFill;
     if (s.level >= 0.995) { s.fillPump = false; s.manualFill = false; }
     const running = s.workflow === 'RUN' && s.level > 0;
-    const branch = [45, 38, 42].map((base, i) => running && s.valves[i] ? base + this.random() * 2 - 1 : 0);
+    const branch = [45, 38, 42].map((base, i) => running && s.valves[i] ? (base + this.random() * 2 - 1) * s.valveOpenings[i] / 100 : 0);
     if (running && s.valves[1] && s.leakB) {
       if (!s.leakRate) s.leakRate = s.scenario === 'leak_b' ? 25 : 5;
       else s.leakRate = Math.max(1, Math.min(30, s.leakRate + (Math.floor(this.random() * 3) - 1) * 0.4));
+      s.leakRate = Math.min(s.leakRate, branch[1]);
     } else s.leakRate = 0;
-    const outflow = branch.reduce((a, b) => a + b, 0) + s.leakRate;
+    const outflow = branch.reduce((a, b) => a + b, 0);
     s.level = Math.max(0, Math.min(1, s.level + (s.fillPump ? 0.03 * dt : running ? -0.012 * outflow / 125 * dt : 0)));
     if (s.level <= 0) { s.workflow = s.autoWorkflow ? 'FILL' : 'IDLE'; branch.fill(0); s.leakRate = 0; }
     if (s.level >= 0.995 && s.fillPump) { s.fillPump = false; s.manualFill = false; if (s.workflow === 'FILL') s.workflow = 'IDLE'; }
