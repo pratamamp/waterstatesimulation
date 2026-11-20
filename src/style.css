@@ -534,4 +534,10 @@ body { line-height: 1.5; }
 .valve-opening input:focus-visible { outline: 2px solid #087d88; outline-offset: 3px; }
 .valve-opening button { color: #087d88; background: #edf8f7; border: 1px solid #c9e3df; border-radius: 3px; padding: 6px 10px; font-size: 11px; font-weight: 600; }
 .valve-opening small { color: #587780; font-size: 11px; white-space: nowrap; }
+.metrics-panel.metrics-leak-active { background: #fff7ef; border-color: #efc9aa; }
+.metrics-leak-active .section-kicker, .metrics-leak-active .metrics-grid span { color: #95532d; }
+.metrics-leak-active .icon-box { color: #ad5d26; background: #fff0e2; border-color: #efd2b9; }
+.metrics-leak-active .metrics-grid > div, .metrics-leak-active .metric-note { border-color: #efd9c8; }
+.metrics-leak-active .metrics-grid strong { color: #8b421b; }
+.metrics-leak-active .metrics-grid strong small, .metrics-leak-active .metrics-grid em, .metrics-leak-active .metric-note { color: #87634f; }
 @media (max-width: 680px) { .valve-opening { margin-top: 12px; flex-wrap: wrap; } .valve-opening label { width: 100%; } }

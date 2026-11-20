@@ -500,7 +500,7 @@ function App() {
                         </div>
                       </div>
                     </section>
-                    <section className="panel metrics-panel">
+                    <section className={`panel metrics-panel ${s.leakB ? "metrics-leak-active" : ""}`}>
                       <div className="panel-heading">
                         <div>
                           <div className="section-kicker">
